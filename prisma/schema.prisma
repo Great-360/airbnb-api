@@ -13,6 +13,7 @@ datasource db {
 }
 
 enum Role {
+  ADMIN
   HOST
   GUEST
 }
@@ -35,13 +36,18 @@ model User {
   name      String
   email     String    @unique
   username  String    @unique
+  password  String
   phone     String
   role      Role      @default(GUEST)
   avatar    String?
   bio       String?
-  createdAt DateTime  @default(now())
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt     DateTime     @default(now())
   listings  Listing[]
   bookings  Booking[]
+
 }
 
 model Listing {

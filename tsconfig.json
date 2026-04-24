@@ -36,7 +36,7 @@
     "strict": true,
     "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "jsx": "react-jsx",
     //"verbatimModuleSyntax": true,
     "isolatedModules": true,

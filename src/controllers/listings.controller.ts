@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 
@@ -64,7 +65,7 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
   res.status(201).json(newListing);
 };
 
-export const updateListing = async (req: Request, res: Response): Promise<void> => {
+export const updateListing = async (req: AuthRequest, res: Response): Promise<void> => {
   const idStr = req.params.id;
   if (!idStr || isNaN(parseInt(idStr))) {
     res.status(400).json({ error: "Invalid id" });
@@ -75,6 +76,10 @@ export const updateListing = async (req: Request, res: Response): Promise<void> 
   if (!listing) {
     res.status(404).json({ error: "Listing not found" });
     return;
+  }
+  if (listing.hostId !== req.userId!){
+   res.status(403).json({ error: "You are not the host of this listing" });
+   return;
   }
   const updatedListing = await prisma.listing.update({
     where: { id },
