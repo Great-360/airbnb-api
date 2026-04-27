@@ -39,8 +39,10 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
   res.json(listing);
 };
 
-export const createListing = async (req: Request, res: Response): Promise<void> => {
-  const { title, description, pricePerNight, location, type, amenities, hostId, guests } = req.body;
+
+export const createListing = async (req: AuthRequest, res: Response): Promise<void> => {
+  const { title, description, pricePerNight, location, type, amenities, guests } = req.body;
+  const hostId = req.userId;
   if (!title || !description || !pricePerNight || !location || !type || !hostId || guests == null) {
     res.status(400).json({ error: "Missing required fields" });
     return;
@@ -77,9 +79,9 @@ export const updateListing = async (req: AuthRequest, res: Response): Promise<vo
     res.status(404).json({ error: "Listing not found" });
     return;
   }
-  if (listing.hostId !== req.userId!){
-   res.status(403).json({ error: "You are not the host of this listing" });
-   return;
+  if (listing.hostId !== req.userId! && req.role !== "ADMIN") {
+    res.status(403).json({ error: "You can only edit your own listings" });
+    return;
   }
   const updatedListing = await prisma.listing.update({
     where: { id },
@@ -88,7 +90,7 @@ export const updateListing = async (req: AuthRequest, res: Response): Promise<vo
   res.json(updatedListing);
 };
 
-export const deleteListing = async (req: Request, res: Response): Promise<void> => {
+export const deleteListing = async (req: AuthRequest, res: Response): Promise<void> => {
   const idStr = req.params.id;
   if (!idStr || isNaN(parseInt(idStr))) {
     res.status(400).json({ error: "Invalid id" });
@@ -100,6 +102,10 @@ export const deleteListing = async (req: Request, res: Response): Promise<void> 
     res.status(404).json({ error: "Listing not found" });
     return;
   }
-  const deletedListing = prisma.listing.delete({ where: { id } });
+  if (listing.hostId !== req.userId! && req.role !== "ADMIN") {
+    res.status(403).json({ error: "You can only delete your own listings" });
+    return;
+  }
+  const deletedListing = await prisma.listing.delete({ where: { id } });
   res.json({ message: "Listing deleted successfully", listing: deletedListing });
 };

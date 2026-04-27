@@ -5,6 +5,9 @@ import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../config/email.js";
+import { passwordResetEmail, welcomeEmail } from "../templates/emails.js";
+
 const prisma = new PrismaClient({
     adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
 })
@@ -47,6 +50,13 @@ export async function register(req: Request, res: Response) {
 
   const { password: _, ...userWithoutPassword } = user;
   res.status(201).json(userWithoutPassword);
+  await sendEmail(
+    email,
+    "Hi",
+    welcomeEmail(name),
+    
+  )
+  console.log("Email sent");
 }
 
 export async function login(req: Request, res: Response) {
@@ -155,6 +165,16 @@ export async function forgotPassword(req: Request, res: Response) {
     console.log(`Reset token for ${email}: ${rawToken}`);
 
     res.json(successrResponse)
+    await sendEmail(
+        email,
+        "Password Reset",
+        `<p>Click the link below to reset your password:</p>
+        <a href="http://localhost:3000/reset-password/${hashedToken}" style="background-color: #FF5A5F; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+          Reset Password
+        </a>
+        <p style="color: #999; font-size: 12px;">If you did not request a password reset, please ignore this email.</p>`
+      )
+      console.log(`Email sent to ${email}`);
 }
 
 export async function resetPassword (req: Request, res: Response) {
@@ -188,4 +208,10 @@ export async function resetPassword (req: Request, res: Response) {
     }
   })
   res.json({message: "Password reset successful"});
+  await sendEmail(
+    user.email,
+    "Password Reset",
+    passwordResetEmail(token)
+  )
+  console.log("email sent")
 }
