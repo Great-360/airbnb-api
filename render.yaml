@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: airbnb-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run db:generate && npm run build
+    startCommand: npm start
