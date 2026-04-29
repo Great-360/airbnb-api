@@ -1,11 +1,8 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from "@prisma/client/extension";
-import { PrismaPg } from '@prisma/adapter-pg';
+
 import bcrypt from "bcrypt";
 
-const prisma = new PrismaClient( {
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
-});
+import prisma from "../config/prisma.js";
 
 export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -26,7 +23,8 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
 
 export const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id || '', 10);
+    const paramId: string = req.params.id as string;
+    const id = parseInt(paramId || '', 10);
     if (isNaN(id)) {
       res.status(400).json({ error: 'Invalid ID' });
       return;
@@ -110,7 +108,8 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
 
 export const updateUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id || "", 10);
+    const paramId: string = req.params.id as string;
+    const id = parseInt(paramId || '', 10);
     if (isNaN(id)) {
       res.status(400).json({ error: 'Invalid ID' });
       return;
@@ -164,7 +163,8 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
 
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id || '', 10);
+    const paramId: string = req.params.id as string;
+    const id = parseInt(paramId || '', 10);
     if (isNaN(id)) {
       res.status(400).json({ error: 'Invalid ID' });
       return;

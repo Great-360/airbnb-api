@@ -1,16 +1,12 @@
 import { Response, Request } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
 import bcrypt from "bcrypt";
-import { PrismaClient } from "../../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
+import prisma from "../config/prisma.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../config/email.js";
 import { passwordResetEmail, welcomeEmail } from "../templates/emails.js";
 
-const prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
-})
 
 export async function register(req: Request, res: Response) {
   const { name, email, username, password, role , phone} = req.body;
@@ -177,14 +173,23 @@ export async function forgotPassword(req: Request, res: Response) {
 }
 
 export async function resetPassword (req: Request, res: Response) {
-  const {token} = req.params;
+  let tokenParam = req.params.token;
   const {password} = req.body;
-  if (!token || password.length < 8) {
+  
+  let tokenStr: string;
+  if (typeof tokenParam === 'string') {
+    tokenStr = tokenParam;
+  } else if (Array.isArray(tokenParam) && tokenParam.length > 0 && typeof tokenParam[0] === 'string') {
+    tokenStr = tokenParam[0];
+  } else {
+    return res.status(400).json({error: "Invalid token"});
+  }
+  
+  if (password.length < 8) {
     return res.status(400).json({error: "Password must be at least 8 characters long"});
-
   }
 
-  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  const hashedToken = crypto.createHash("sha256").update(tokenStr).digest("hex");
 
   const user =  await prisma.user.findFirst({
     where: {
@@ -210,7 +215,7 @@ export async function resetPassword (req: Request, res: Response) {
   await sendEmail(
     user.email,
     "Password Reset Confirmation",
-    passwordResetEmail(user.name, `http://localhost:3000/reset-password/${token}`),
+    passwordResetEmail(user.name, `http://localhost:3000/reset-password/${tokenStr}`),
   );
   console.log("Password reset email sent");
 }

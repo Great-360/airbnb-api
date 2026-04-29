@@ -1,5 +1,11 @@
-import nodemailer from "nodemailer";
-const transporter = nodemailer.createTransport({
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.sendEmail = sendEmail;
+const nodemailer_1 = __importDefault(require("nodemailer"));
+const transporter = nodemailer_1.default.createTransport({
     host: process.env.EMAIL_HOST,
     port: Number(process.env.EMAIL_PORT),
     auth: {
@@ -7,7 +13,7 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     },
 });
-export async function sendEmail(to, subject, html) {
+async function sendEmail(to, subject, html) {
     await transporter.sendMail({
         from: process.env.EMAIL_FROM,
         to,
@@ -15,5 +21,5 @@ export async function sendEmail(to, subject, html) {
         html,
     });
 }
-export default transporter;
+exports.default = transporter;
 //# sourceMappingURL=email.js.map

@@ -1,19 +1,30 @@
 import type { Response } from "express";
+import type { ParamsDictionary } from "express-serve-static-core";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { uploadToCloudinary, deleteFromCloudinary } from "../config/cloudinary.js";
-import { PrismaClient } from "@prisma/client/extension";
-import { PrismaPg } from "@prisma/adapter-pg";
+import prisma from "../config/prisma.js";
 
-const prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
-});
+function getParamAsNumber(paramName: string, params: ParamsDictionary): number {
+    const paramValue = params[paramName];
+
+    let paramStr: string;
+    if (typeof paramValue === 'string') {
+        paramStr = paramValue;
+    } else if (Array.isArray(paramValue) && paramValue.length === 1) {
+        paramStr = paramValue[0] as string;
+    } else {
+        throw new Error(`Invalid parameter: ${paramName}`);
+    }
+
+    const num = parseInt(paramStr, 10);
+    if (isNaN(num)) {
+        throw new Error(`Invalid numeric parameter: ${paramName}`);
+    }
+    return num;
+}
 
 export async function uploadAvatar(req: AuthRequest, res: Response) {
-    const id = parseInt(req.params.id || "", 10);
-
-    if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid user ID" });
-    }
+    const id = getParamAsNumber("id", req.params);
 
     if (req.userId !== id) {
         return res.status(403).json({ error: "Forbidden: you can only update your own avatar" });
@@ -47,11 +58,7 @@ export async function uploadAvatar(req: AuthRequest, res: Response) {
 }
 
 export async function deleteAvatar(req: AuthRequest, res: Response) {
-    const id = parseInt(req.params.id || "", 10);
-
-    if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid user ID" });
-    }
+    const id = getParamAsNumber("id", req.params);
 
     if (req.userId !== id) {
         return res.status(403).json({ error: "Forbidden: you can only delete your own avatar" });
@@ -79,11 +86,7 @@ export async function deleteAvatar(req: AuthRequest, res: Response) {
 }
 
 export async function uploadListingPhotos(req: AuthRequest, res: Response) {
-    const id = parseInt(req.params.id || "", 10);
-
-    if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid listing ID" });
-    }
+    const id = getParamAsNumber("id", req.params);
 
     const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing) {
@@ -127,12 +130,8 @@ export async function uploadListingPhotos(req: AuthRequest, res: Response) {
 }
 
 export async function deleteListingPhoto(req: AuthRequest, res: Response) {
-    const id = parseInt(req.params.id || "", 10);
-    const photoId = parseInt(req.params.photoId || "", 10);
-
-    if (isNaN(id) || isNaN(photoId)) {
-        return res.status(400).json({ error: "Invalid listing or photo ID" });
-    }
+    const id = getParamAsNumber("id", req.params);
+    const photoId = getParamAsNumber("photoId", req.params);
 
     const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing) {
@@ -157,4 +156,3 @@ export async function deleteListingPhoto(req: AuthRequest, res: Response) {
 
     return res.json({ message: "Photo deleted successfully" });
 }
-

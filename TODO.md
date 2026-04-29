@@ -1,10 +1,1 @@
-# Fix Prisma ESM Import Error
-
-## Steps:
-- [ ] 1. Read controller files and seed.ts to confirm import strings.
-- [x] 2. Edit all PrismaClient imports to include '.js' suffix.
-- [x] 3. Run `npx prisma generate` to ensure client up-to-date.
-- [x] 4. Run `npm run build` to compile and copy generated client.
-- [ ] 5. Regenerate Prisma client with default output and rebuild.
-- [ ] 6. Update TODO.md with completion.
-- [ ] 7. Attempt completion.
+# Task: Fix TypeScript errors in users.controller.ts&#10;&#10;## Steps:&#10;1. [ ] Create TODO.md (current)&#10;2. [ ] Edit users.controller.ts to fix param handling&#10;3. [ ] Verify with tsc --noEmit&#10;4. [ ] Complete task&#10;

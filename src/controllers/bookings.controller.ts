@@ -1,13 +1,10 @@
+
 import { Request, Response } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
-import { PrismaClient } from "@prisma/client/extension";
-import { PrismaPg } from "@prisma/adapter-pg";
+import prisma from "../config/prisma.js";
 import { sendEmail } from "../config/email.js";
 import { bookingConfirmationEmail, bookingCancellationEmail } from "../templates/emails.js";
 
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
-})
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
@@ -33,7 +30,7 @@ export const getAllBookings = async (req: Request, res: Response): Promise<void>
 };
 
 export const getBookingById = async (req: Request, res: Response): Promise<void> => {
-  const idStr = req.params.id;
+  const idStr: string = req.params.id as string;
   if (!idStr || isNaN(parseInt(idStr))) {
     res.status(400).json({ error: "Invalid id" });
     return;
@@ -131,7 +128,7 @@ export const createBooking = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 export const deleteBooking = async (req: AuthRequest, res: Response): Promise<void> => {
-  const idStr = req.params.id;
+  const idStr: string = req.params.id as string;
   if (!idStr || isNaN(parseInt(idStr))) {
     res.status(400).json({ error: "Invalid id" });
     return;

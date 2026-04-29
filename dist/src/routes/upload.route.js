@@ -1,8 +1,13 @@
-import { Router } from "express";
-import upload from "../config/multer.js";
-import { uploadAvatar, deleteAvatar, } from "../controllers/upload.controller.js";
-import { authentication } from "../middlewares/auth.middleware.js";
-const router = Router();
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const multer_js_1 = __importDefault(require("../config/multer.js"));
+const upload_controller_js_1 = require("../controllers/upload.controller.js");
+const auth_middleware_js_1 = require("../middlewares/auth.middleware.js");
+const router = (0, express_1.Router)();
 /**
  * @swagger
  * /users/{id}/avatar:
@@ -44,7 +49,7 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/:id/avatar", authentication, upload.single("image"), uploadAvatar);
+router.post("/:id/avatar", auth_middleware_js_1.authentication, multer_js_1.default.single("image"), upload_controller_js_1.uploadAvatar);
 /**
  * @swagger
  * /users/{id}/avatar:
@@ -76,6 +81,6 @@ router.post("/:id/avatar", authentication, upload.single("image"), uploadAvatar)
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.delete("/:id/avatar", authentication, deleteAvatar);
-export default router;
+router.delete("/:id/avatar", auth_middleware_js_1.authentication, upload_controller_js_1.deleteAvatar);
+exports.default = router;
 //# sourceMappingURL=upload.route.js.map

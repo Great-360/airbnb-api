@@ -1,4 +1,10 @@
-export function welcomeEmail(name, role) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.welcomeEmail = welcomeEmail;
+exports.bookingConfirmationEmail = bookingConfirmationEmail;
+exports.bookingCancellationEmail = bookingCancellationEmail;
+exports.passwordResetEmail = passwordResetEmail;
+function welcomeEmail(name, role) {
     const ctaText = role === "HOST" ? "Create Your First Listing" : "Explore Listings";
     const ctaHref = role === "HOST"
         ? "http://localhost:3000/listings/new"
@@ -16,7 +22,7 @@ export function welcomeEmail(name, role) {
     </a>
   </div>`;
 }
-export function bookingConfirmationEmail(guestName, listingTitle, location, checkIn, checkOut, totalPrice) {
+function bookingConfirmationEmail(guestName, listingTitle, location, checkIn, checkOut, totalPrice) {
     return `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <h1 style="color: #FF5A5F;">Booking Confirmed</h1>
@@ -31,7 +37,7 @@ export function bookingConfirmationEmail(guestName, listingTitle, location, chec
     <p style="font-size: 13px; color: #555;">Please review our <a href="http://localhost:3000/cancellation-policy" style="color: #FF5A5F; text-decoration: none;">cancellation policy</a> for more details.</p>
   </div>`;
 }
-export function bookingCancellationEmail(guestName, listingTitle, checkIn, checkOut) {
+function bookingCancellationEmail(guestName, listingTitle, checkIn, checkOut) {
     return `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <h1 style="color: #FF5A5F;">Booking Cancelled</h1>
@@ -45,7 +51,7 @@ export function bookingCancellationEmail(guestName, listingTitle, checkIn, check
     </a>
   </div>`;
 }
-export function passwordResetEmail(name, resetLink) {
+function passwordResetEmail(name, resetLink) {
     return `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <h1 style="color: #FF5A5F;">Password Reset</h1>

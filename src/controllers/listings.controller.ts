@@ -1,11 +1,8 @@
 import { Request, Response } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
-import { PrismaClient } from "@prisma/client/extension";
-import { PrismaPg } from "@prisma/adapter-pg";
+import prisma from "../config/prisma.js";
 
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
-});
+
 
 export const getAllListings = async (req: Request, res: Response): Promise<void> => {
   const listings = await prisma.listing.findMany({
@@ -22,7 +19,7 @@ export const getAllListings = async (req: Request, res: Response): Promise<void>
 };
 
 export const getListingById = async (req: Request, res: Response): Promise<void> => {
-  const idStr = req.params.id;
+  const idStr: string = req.params.id as string;
   if (!idStr || isNaN(parseInt(idStr))) {
     res.status(400).json({ error: "Invalid id" });
     return;
@@ -68,7 +65,7 @@ export const createListing = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 export const updateListing = async (req: AuthRequest, res: Response): Promise<void> => {
-  const idStr = req.params.id;
+  const idStr: string = req.params.id as string;
   if (!idStr || isNaN(parseInt(idStr))) {
     res.status(400).json({ error: "Invalid id" });
     return;
@@ -91,7 +88,7 @@ export const updateListing = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 export const deleteListing = async (req: AuthRequest, res: Response): Promise<void> => {
-  const idStr = req.params.id;
+  const idStr: string = req.params.id as string;
   if (!idStr || isNaN(parseInt(idStr))) {
     res.status(400).json({ error: "Invalid id" });
     return;

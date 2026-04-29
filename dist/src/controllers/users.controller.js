@@ -1,12 +1,14 @@
-import { PrismaClient } from "@prisma/client/extension";
-import { PrismaPg } from '@prisma/adapter-pg';
-import bcrypt from "bcrypt";
-const prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
-});
-export const getAllUsers = async (req, res) => {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getAllUsers = void 0;
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const prisma_js_1 = __importDefault(require("../config/prisma.js"));
+const getAllUsers = async (req, res) => {
     try {
-        const users = await prisma.user.findMany({
+        const users = await prisma_js_1.default.user.findMany({
             include: {
                 _count: {
                     select: {
@@ -21,14 +23,16 @@ export const getAllUsers = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch users' });
     }
 };
-export const getUserById = async (req, res) => {
+exports.getAllUsers = getAllUsers;
+const getUserById = async (req, res) => {
     try {
-        const id = parseInt(req.params.id || '', 10);
+        const paramId = req.params.id;
+        const id = parseInt(paramId || '', 10);
         if (isNaN(id)) {
             res.status(400).json({ error: 'Invalid ID' });
             return;
         }
-        const user = await prisma.user.findUnique({
+        const user = await prisma_js_1.default.user.findUnique({
             where: { id },
             include: {
                 listings: true,
@@ -46,21 +50,22 @@ export const getUserById = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch user' });
     }
 };
-export const createUser = async (req, res) => {
+exports.getUserById = getUserById;
+const createUser = async (req, res) => {
     try {
         const body = req.body;
         if (!body.name || !body.email || !body.username || !body.phone || !body.password) {
             res.status(400).json({ error: 'Missing required fields: name, email, username, phone, password' });
             return;
         }
-        const existingUser = await prisma.user.findFirst({
+        const existingUser = await prisma_js_1.default.user.findFirst({
             where: { OR: [{ email: body.email }, { username: body.username }] },
         });
         if (existingUser) {
             res.status(409).json({ error: 'Email or username already exists' });
             return;
         }
-        const hashedPassword = await bcrypt.hash(body.password, 10);
+        const hashedPassword = await bcrypt_1.default.hash(body.password, 10);
         const userData = {
             name: body.name,
             email: body.email,
@@ -74,7 +79,7 @@ export const createUser = async (req, res) => {
             userData.avatar = body.avatar;
         if (body.bio !== undefined)
             userData.bio = body.bio;
-        const user = await prisma.user.create({
+        const user = await prisma_js_1.default.user.create({
             data: userData,
         });
         const { password: _, ...userWithoutPassword } = user;
@@ -88,14 +93,16 @@ export const createUser = async (req, res) => {
         res.status(500).json({ error: 'Failed to create user' });
     }
 };
-export const updateUser = async (req, res) => {
+exports.createUser = createUser;
+const updateUser = async (req, res) => {
     try {
-        const id = parseInt(req.params.id || "", 10);
+        const paramId = req.params.id;
+        const id = parseInt(paramId || '', 10);
         if (isNaN(id)) {
             res.status(400).json({ error: 'Invalid ID' });
             return;
         }
-        const existingUser = await prisma.user.findUnique({ where: { id } });
+        const existingUser = await prisma_js_1.default.user.findUnique({ where: { id } });
         if (!existingUser) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -120,7 +127,7 @@ export const updateUser = async (req, res) => {
             res.status(400).json({ error: 'No fields to update' });
             return;
         }
-        const user = await prisma.user.update({
+        const user = await prisma_js_1.default.user.update({
             where: { id },
             data: updateData,
         });
@@ -135,23 +142,26 @@ export const updateUser = async (req, res) => {
         res.status(500).json({ error: 'Failed to update user' });
     }
 };
-export const deleteUser = async (req, res) => {
+exports.updateUser = updateUser;
+const deleteUser = async (req, res) => {
     try {
-        const id = parseInt(req.params.id || '', 10);
+        const paramId = req.params.id;
+        const id = parseInt(paramId || '', 10);
         if (isNaN(id)) {
             res.status(400).json({ error: 'Invalid ID' });
             return;
         }
-        const existingUser = await prisma.user.findUnique({ where: { id } });
+        const existingUser = await prisma_js_1.default.user.findUnique({ where: { id } });
         if (!existingUser) {
             res.status(404).json({ error: 'User not found' });
             return;
         }
-        await prisma.user.delete({ where: { id } });
+        await prisma_js_1.default.user.delete({ where: { id } });
         res.status(204).send();
     }
     catch (error) {
         res.status(500).json({ error: 'Failed to delete user' });
     }
 };
+exports.deleteUser = deleteUser;
 //# sourceMappingURL=users.controller.js.map
