@@ -1,0 +1,4 @@
+{"sessionId":"1202ca","runId":"pre-fix","hypothesisId":"H1","location":"src/config/prisma.ts","message":"prisma-module-imported","data":{"cwd":"/home/pierrette/Code/airbnb-api","nodeEnv":null,"databaseUrlPresent":true},"timestamp":1777492201948}
+{"sessionId":"1202ca","runId":"pre-fix","hypothesisId":"H2","location":"src/config/prisma.ts","message":"prisma-client-files-and-versions","data":{"prismaClientPackageExists":true,"generatedClientIndexExists":true,"generatedClientPackageExists":true,"prismaClientVersion":"7.8.0","generatedClientVersion":"7.8.0"},"timestamp":1777492202200}
+{"sessionId":"1202ca","runId":"pre-fix","hypothesisId":"H3","location":"src/config/prisma.ts","message":"adapter-created","data":{"poolMax":10,"sslEnabled":false},"timestamp":1777492202203}
+{"sessionId":"1202ca","runId":"pre-fix","hypothesisId":"H4","location":"src/config/prisma.ts","message":"prisma-client-instantiated","data":{"instantiated":true},"timestamp":1777492202234}

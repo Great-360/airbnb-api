@@ -12,7 +12,8 @@
     "db:reset": "prisma migrate reset",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "db:generate": "prisma generate",
+    "db:generate": "prisma generate && npm run db:link-client",
+    "db:link-client": "node -e \"const fs=require('fs');const p=require('path');const t=p.join(process.cwd(),'node_modules','@prisma','client','.prisma');if(!fs.existsSync(t)){fs.mkdirSync(p.dirname(t),{recursive:true});fs.symlinkSync(p.join('..','..','.prisma'),t,'dir');console.log('linked',t);}else{console.log('link-exists',t);}\"",
     "db:fresh": "prisma migrate reset",
     "migrate": "prisma migrate deploy"
   },
@@ -35,13 +36,13 @@
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "nodemon": "^3.1.14",
-    "prisma": "^6.19.3",
+    "prisma": "7.8.0",
     "tsx": "^4.16.2",
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.8.0",
-    "@prisma/client": "^7.8.0",
+    "@prisma/adapter-pg": "7.8.0",
+    "@prisma/client": "7.8.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.10.0",
     "compression": "^1.8.1",
@@ -57,5 +58,10 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "zod": "^4.3.6"
+  },
+  "overrides": {
+    "prisma": "7.8.0",
+    "@prisma/client": "7.8.0",
+    "@prisma/adapter-pg": "7.8.0"
   }
 }
