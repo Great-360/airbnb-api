@@ -10,7 +10,7 @@ import { setupSwagger } from './config/swagger.js';
 
 
 const app: Express = express();
-const port = 3000;
+const port = Number(process.env.PORT) || 10000;
 
 app.use(express.json());
 
@@ -28,7 +28,7 @@ app.get('/', (req: Request, res: Response) => {
 
 setupSwagger(app);
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server running on port ${port}`);
 });
 

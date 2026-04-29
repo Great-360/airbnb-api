@@ -52,11 +52,10 @@ export async function register(req: Request, res: Response) {
   res.status(201).json(userWithoutPassword);
   await sendEmail(
     email,
-    "Hi",
-    welcomeEmail(name),
-    
-  )
-  console.log("Email sent");
+    "Welcome to Airbnb",
+    welcomeEmail(name, role ?? 'GUEST'),
+  );
+  console.log("Welcome email sent");
 }
 
 export async function login(req: Request, res: Response) {
@@ -210,8 +209,8 @@ export async function resetPassword (req: Request, res: Response) {
   res.json({message: "Password reset successful"});
   await sendEmail(
     user.email,
-    "Password Reset",
-    passwordResetEmail(token)
-  )
-  console.log("email sent")
+    "Password Reset Confirmation",
+    passwordResetEmail(user.name, `http://localhost:3000/reset-password/${token}`),
+  );
+  console.log("Password reset email sent");
 }
