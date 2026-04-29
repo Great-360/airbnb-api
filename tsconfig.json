@@ -36,7 +36,6 @@
     // Recommended Options
     "strict": true,
     "module": "commonjs",
-    "moduleResolution": "node",
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "ignoreDeprecations": "5.0",

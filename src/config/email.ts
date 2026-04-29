@@ -1,6 +1,4 @@
 import nodemailer from "nodemailer";
-import { defaultMaxListeners } from "stream";
-
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: Number(process.env.EMAIL_PORT),
