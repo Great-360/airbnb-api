@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
-import { PrismaClient } from "../../generated/prisma/client.js";
+import { PrismaClient } from "@prisma/client/extension";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const prisma = new PrismaClient({

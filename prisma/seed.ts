@@ -1,5 +1,5 @@
 import "dotenv/config.js";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient } from "@prisma/client/extension";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 
@@ -131,3 +131,7 @@ main ()
     console.error("seed failed: ", err);
     process.exit(1);
   })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+

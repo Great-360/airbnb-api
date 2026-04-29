@@ -3,8 +3,7 @@ import {
     register, login, getMe, 
     changePassword, resetPassword, forgotPassword
 }from "../controllers/auth.controller.js";
-
-import { authentication } from "../middlewares/auth.middleware";
+import { authentication } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger

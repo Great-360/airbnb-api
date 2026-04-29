@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '../../generated/prisma/client';
+import { PrismaClient } from "@prisma/client/extension";
 import { PrismaPg } from '@prisma/adapter-pg';
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient( {
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
@@ -44,7 +45,8 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    res.json(user);
+    const { password: _, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch user' });
   }
@@ -57,21 +59,34 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
       email: string;
       username: string;
       phone: string;
+      password: string;
       role?: string;
       avatar?: string;
       bio?: string;
     };
 
-    if (!body.name || !body.email || !body.username || !body.phone) {
-      res.status(400).json({ error: 'Missing required fields: name, email, username, phone' });
+    if (!body.name || !body.email || !body.username || !body.phone || !body.password) {
+      res.status(400).json({ error: 'Missing required fields: name, email, username, phone, password' });
       return;
     }
+
+    const existingUser = await prisma.user.findFirst({
+      where: { OR: [{ email: body.email }, { username: body.username }] },
+    });
+
+    if (existingUser) {
+      res.status(409).json({ error: 'Email or username already exists' });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(body.password, 10);
 
     const userData: any = {
       name: body.name,
       email: body.email,
       username: body.username,
       phone: body.phone,
+      password: hashedPassword,
     };
 
     if (body.role !== undefined) userData.role = body.role;
@@ -82,7 +97,8 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
       data: userData,
     });
 
-    res.status(201).json(user);
+    const { password: _, ...userWithoutPassword } = user;
+    res.status(201).json(userWithoutPassword);
   } catch (error: any) {
     if (error.code === 'P2002') {
       res.status(409).json({ error: 'Email or username already exists' });
@@ -135,7 +151,8 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       data: updateData,
     });
 
-    res.json(user);
+    const { password: _, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
   } catch (error: any) {
     if (error.code === 'P2002') {
       res.status(409).json({ error: 'Email or username already exists' });
@@ -165,4 +182,3 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ error: 'Failed to delete user' });
   }
 };
-
