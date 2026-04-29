@@ -1,8 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const auth_controller_js_1 = require("../controllers/auth.controller.js");
-const auth_middleware_js_1 = require("../middlewares/auth.middleware.js");
+import { Router } from "express";
+import { register, login, getMe, changePassword, resetPassword, forgotPassword } from "../controllers/auth.controller.js";
+import { authentication } from "../middlewares/auth.middleware.js";
 /**
  * @swagger
  * components:
@@ -55,7 +53,7 @@ const auth_middleware_js_1 = require("../middlewares/auth.middleware.js");
  *           type: string
  *           example: Resource not found
  */
-const router = (0, express_1.Router)();
+const router = Router();
 /**
  * @swagger
  * /auth/register:
@@ -88,7 +86,7 @@ const router = (0, express_1.Router)();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/register", auth_controller_js_1.register);
+router.post("/register", register);
 /**
  * @swagger
  * /auth/login:
@@ -121,7 +119,7 @@ router.post("/register", auth_controller_js_1.register);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/login", auth_controller_js_1.login);
+router.post("/login", login);
 /**
  * @swagger
  * /auth/me:
@@ -144,7 +142,7 @@ router.post("/login", auth_controller_js_1.login);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get("/me", auth_middleware_js_1.authentication, auth_controller_js_1.getMe);
+router.get("/me", authentication, getMe);
 /**
  * @swagger
  * /auth/change-password:
@@ -183,7 +181,7 @@ router.get("/me", auth_middleware_js_1.authentication, auth_controller_js_1.getM
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/change-password", auth_middleware_js_1.authentication, auth_controller_js_1.changePassword);
+router.post("/change-password", authentication, changePassword);
 /**
  * @swagger
  * /auth/forgot-password:
@@ -206,7 +204,7 @@ router.post("/change-password", auth_middleware_js_1.authentication, auth_contro
  *       200:
  *         description: Password reset email sent if account exists
  */
-router.post("/forgot-password", auth_controller_js_1.forgotPassword);
+router.post("/forgot-password", forgotPassword);
 /**
  * @swagger
  * /auth/reset-password/{token}:
@@ -241,6 +239,6 @@ router.post("/forgot-password", auth_controller_js_1.forgotPassword);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/reset-password/:token", auth_controller_js_1.resetPassword);
-exports.default = router;
+router.post("/reset-password/:token", resetPassword);
+export default router;
 //# sourceMappingURL=auth.route.js.map

@@ -1,46 +1,8 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const listingController = __importStar(require("../controllers/listings.controller.js"));
-const auth_middleware_js_1 = require("../middlewares/auth.middleware.js");
-const multer_js_1 = __importDefault(require("../config/multer.js"));
-const upload_controller_js_1 = require("../controllers/upload.controller.js");
+import { Router } from 'express';
+import * as listingController from '../controllers/listings.controller.js';
+import { authentication, requireHost } from '../middlewares/auth.middleware.js';
+import upload from '../config/multer.js';
+import { uploadListingPhotos, deleteListingPhoto } from '../controllers/upload.controller.js';
 /**
  * @swagger
  * components:
@@ -158,7 +120,7 @@ const upload_controller_js_1 = require("../controllers/upload.controller.js");
  *           type: string
  *           example: Amazing stay, highly recommended!
  */
-const router = (0, express_1.Router)();
+const router = Router();
 /**
  * @swagger
  * /listings:
@@ -260,7 +222,7 @@ router.get('/:id', listingController.getListingById);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/', auth_middleware_js_1.authentication, auth_middleware_js_1.requireHost, listingController.createListing);
+router.post('/', authentication, requireHost, listingController.createListing);
 /**
  * @swagger
  * /listings/{id}:
@@ -308,7 +270,7 @@ router.post('/', auth_middleware_js_1.authentication, auth_middleware_js_1.requi
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.put('/:id', auth_middleware_js_1.authentication, listingController.updateListing);
+router.put('/:id', authentication, listingController.updateListing);
 /**
  * @swagger
  * /listings/{id}:
@@ -340,7 +302,7 @@ router.put('/:id', auth_middleware_js_1.authentication, listingController.update
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.delete('/:id', auth_middleware_js_1.authentication, listingController.deleteListing);
+router.delete('/:id', authentication, listingController.deleteListing);
 /**
  * @swagger
  * /listings/{id}/photos:
@@ -384,7 +346,7 @@ router.delete('/:id', auth_middleware_js_1.authentication, listingController.del
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/:id/photos', auth_middleware_js_1.authentication, multer_js_1.default.array('photos', 5), upload_controller_js_1.uploadListingPhotos);
+router.post('/:id/photos', authentication, upload.array('photos', 5), uploadListingPhotos);
 /**
  * @swagger
  * /listings/{id}/photos/{photoId}:
@@ -422,6 +384,6 @@ router.post('/:id/photos', auth_middleware_js_1.authentication, multer_js_1.defa
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.delete('/:id/photos/:photoId', auth_middleware_js_1.authentication, upload_controller_js_1.deleteListingPhoto);
-exports.default = router;
+router.delete('/:id/photos/:photoId', authentication, deleteListingPhoto);
+export default router;
 //# sourceMappingURL=listings.route.js.map

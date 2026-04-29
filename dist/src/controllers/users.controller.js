@@ -1,14 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getAllUsers = void 0;
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const prisma_js_1 = __importDefault(require("../config/prisma.js"));
-const getAllUsers = async (req, res) => {
+import bcrypt from "bcrypt";
+import prisma from "../config/prisma.js";
+export const getAllUsers = async (req, res) => {
     try {
-        const users = await prisma_js_1.default.user.findMany({
+        const users = await prisma.user.findMany({
             include: {
                 _count: {
                     select: {
@@ -23,8 +17,7 @@ const getAllUsers = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch users' });
     }
 };
-exports.getAllUsers = getAllUsers;
-const getUserById = async (req, res) => {
+export const getUserById = async (req, res) => {
     try {
         const paramId = req.params.id;
         const id = parseInt(paramId || '', 10);
@@ -32,7 +25,7 @@ const getUserById = async (req, res) => {
             res.status(400).json({ error: 'Invalid ID' });
             return;
         }
-        const user = await prisma_js_1.default.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id },
             include: {
                 listings: true,
@@ -50,22 +43,21 @@ const getUserById = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch user' });
     }
 };
-exports.getUserById = getUserById;
-const createUser = async (req, res) => {
+export const createUser = async (req, res) => {
     try {
         const body = req.body;
         if (!body.name || !body.email || !body.username || !body.phone || !body.password) {
             res.status(400).json({ error: 'Missing required fields: name, email, username, phone, password' });
             return;
         }
-        const existingUser = await prisma_js_1.default.user.findFirst({
+        const existingUser = await prisma.user.findFirst({
             where: { OR: [{ email: body.email }, { username: body.username }] },
         });
         if (existingUser) {
             res.status(409).json({ error: 'Email or username already exists' });
             return;
         }
-        const hashedPassword = await bcrypt_1.default.hash(body.password, 10);
+        const hashedPassword = await bcrypt.hash(body.password, 10);
         const userData = {
             name: body.name,
             email: body.email,
@@ -79,7 +71,7 @@ const createUser = async (req, res) => {
             userData.avatar = body.avatar;
         if (body.bio !== undefined)
             userData.bio = body.bio;
-        const user = await prisma_js_1.default.user.create({
+        const user = await prisma.user.create({
             data: userData,
         });
         const { password: _, ...userWithoutPassword } = user;
@@ -93,8 +85,7 @@ const createUser = async (req, res) => {
         res.status(500).json({ error: 'Failed to create user' });
     }
 };
-exports.createUser = createUser;
-const updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
     try {
         const paramId = req.params.id;
         const id = parseInt(paramId || '', 10);
@@ -102,7 +93,7 @@ const updateUser = async (req, res) => {
             res.status(400).json({ error: 'Invalid ID' });
             return;
         }
-        const existingUser = await prisma_js_1.default.user.findUnique({ where: { id } });
+        const existingUser = await prisma.user.findUnique({ where: { id } });
         if (!existingUser) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -127,7 +118,7 @@ const updateUser = async (req, res) => {
             res.status(400).json({ error: 'No fields to update' });
             return;
         }
-        const user = await prisma_js_1.default.user.update({
+        const user = await prisma.user.update({
             where: { id },
             data: updateData,
         });
@@ -142,8 +133,7 @@ const updateUser = async (req, res) => {
         res.status(500).json({ error: 'Failed to update user' });
     }
 };
-exports.updateUser = updateUser;
-const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     try {
         const paramId = req.params.id;
         const id = parseInt(paramId || '', 10);
@@ -151,17 +141,16 @@ const deleteUser = async (req, res) => {
             res.status(400).json({ error: 'Invalid ID' });
             return;
         }
-        const existingUser = await prisma_js_1.default.user.findUnique({ where: { id } });
+        const existingUser = await prisma.user.findUnique({ where: { id } });
         if (!existingUser) {
             res.status(404).json({ error: 'User not found' });
             return;
         }
-        await prisma_js_1.default.user.delete({ where: { id } });
+        await prisma.user.delete({ where: { id } });
         res.status(204).send();
     }
     catch (error) {
         res.status(500).json({ error: 'Failed to delete user' });
     }
 };
-exports.deleteUser = deleteUser;
 //# sourceMappingURL=users.controller.js.map

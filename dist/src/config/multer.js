@@ -1,10 +1,5 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const multer_1 = __importDefault(require("multer"));
-const storage = multer_1.default.memoryStorage();
+import multer from "multer";
+const storage = multer.memoryStorage();
 function fileFilter(req, file, cb) {
     const alloweTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     if (alloweTypes.includes(file.mimetype)) {
@@ -14,10 +9,10 @@ function fileFilter(req, file, cb) {
         cb(new Error('Only images files are allowed (jpeg, jpg, png, webpg, gif)'));
     }
 }
-const upload = (0, multer_1.default)({
+const upload = multer({
     storage,
     fileFilter,
     limits: { fileSize: 5 * 1024 * 1024 },
 });
-exports.default = upload;
+export default upload;
 //# sourceMappingURL=multer.js.map

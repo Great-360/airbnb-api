@@ -1,14 +1,5 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadAvatar = uploadAvatar;
-exports.deleteAvatar = deleteAvatar;
-exports.uploadListingPhotos = uploadListingPhotos;
-exports.deleteListingPhoto = deleteListingPhoto;
-const cloudinary_js_1 = require("../config/cloudinary.js");
-const prisma_js_1 = __importDefault(require("../config/prisma.js"));
+import { uploadToCloudinary, deleteFromCloudinary } from "../config/cloudinary.js";
+import prisma from "../config/prisma.js";
 function getParamAsNumber(paramName, params) {
     const paramValue = params[paramName];
     let paramStr;
@@ -27,7 +18,7 @@ function getParamAsNumber(paramName, params) {
     }
     return num;
 }
-async function uploadAvatar(req, res) {
+export async function uploadAvatar(req, res) {
     const id = getParamAsNumber("id", req.params);
     if (req.userId !== id) {
         return res.status(403).json({ error: "Forbidden: you can only update your own avatar" });
@@ -35,27 +26,27 @@ async function uploadAvatar(req, res) {
     if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
     }
-    const user = await prisma_js_1.default.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
         return res.status(404).json({ error: "User not found" });
     }
     if (user.avatarPublicId) {
-        await (0, cloudinary_js_1.deleteFromCloudinary)(user.avatarPublicId);
+        await deleteFromCloudinary(user.avatarPublicId);
     }
-    const { url, publicId } = await (0, cloudinary_js_1.uploadToCloudinary)(req.file.buffer, "airbnb/avatars");
-    const updated = await prisma_js_1.default.user.update({
+    const { url, publicId } = await uploadToCloudinary(req.file.buffer, "airbnb/avatars");
+    const updated = await prisma.user.update({
         where: { id },
         data: { avatar: url, avatarPublicId: publicId },
     });
     const { password, ...userWithoutPassword } = updated;
     return res.json(userWithoutPassword);
 }
-async function deleteAvatar(req, res) {
+export async function deleteAvatar(req, res) {
     const id = getParamAsNumber("id", req.params);
     if (req.userId !== id) {
         return res.status(403).json({ error: "Forbidden: you can only delete your own avatar" });
     }
-    const user = await prisma_js_1.default.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
         return res.status(404).json({ error: "User not found" });
     }
@@ -63,24 +54,24 @@ async function deleteAvatar(req, res) {
         return res.status(400).json({ error: "No avatar to remove" });
     }
     if (user.avatarPublicId) {
-        await (0, cloudinary_js_1.deleteFromCloudinary)(user.avatarPublicId);
+        await deleteFromCloudinary(user.avatarPublicId);
     }
-    await prisma_js_1.default.user.update({
+    await prisma.user.update({
         where: { id },
         data: { avatar: null, avatarPublicId: null },
     });
     return res.json({ message: "Avatar deleted successfully" });
 }
-async function uploadListingPhotos(req, res) {
+export async function uploadListingPhotos(req, res) {
     const id = getParamAsNumber("id", req.params);
-    const listing = await prisma_js_1.default.listing.findUnique({ where: { id } });
+    const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing) {
         return res.status(404).json({ error: "Listing not found" });
     }
     if (listing.hostId !== req.userId) {
         return res.status(403).json({ error: "Forbidden: you can only upload photos to your own listings" });
     }
-    const existingCount = await prisma_js_1.default.listingPhoto.count({ where: { listingId: id } });
+    const existingCount = await prisma.listingPhoto.count({ where: { listingId: id } });
     if (existingCount >= 5) {
         return res.status(400).json({ error: "Maximum of 5 photos allowed per listing" });
     }
@@ -91,8 +82,8 @@ async function uploadListingPhotos(req, res) {
     const remainingSlots = 5 - existingCount;
     const filesToProcess = files.slice(0, remainingSlots);
     for (const file of filesToProcess) {
-        const { url, publicId } = await (0, cloudinary_js_1.uploadToCloudinary)(file.buffer, "airbnb/listings");
-        await prisma_js_1.default.listingPhoto.create({
+        const { url, publicId } = await uploadToCloudinary(file.buffer, "airbnb/listings");
+        await prisma.listingPhoto.create({
             data: {
                 url,
                 publicId,
@@ -100,31 +91,31 @@ async function uploadListingPhotos(req, res) {
             },
         });
     }
-    const updatedListing = await prisma_js_1.default.listing.findUnique({
+    const updatedListing = await prisma.listing.findUnique({
         where: { id },
         include: { photos: true },
     });
     return res.json(updatedListing);
 }
-async function deleteListingPhoto(req, res) {
+export async function deleteListingPhoto(req, res) {
     const id = getParamAsNumber("id", req.params);
     const photoId = getParamAsNumber("photoId", req.params);
-    const listing = await prisma_js_1.default.listing.findUnique({ where: { id } });
+    const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing) {
         return res.status(404).json({ error: "Listing not found" });
     }
     if (listing.hostId !== req.userId) {
         return res.status(403).json({ error: "Forbidden: you can only delete photos from your own listings" });
     }
-    const photo = await prisma_js_1.default.listingPhoto.findUnique({ where: { id: photoId } });
+    const photo = await prisma.listingPhoto.findUnique({ where: { id: photoId } });
     if (!photo) {
         return res.status(404).json({ error: "Photo not found" });
     }
     if (photo.listingId !== id) {
         return res.status(403).json({ error: "Forbidden: photo does not belong to this listing" });
     }
-    await (0, cloudinary_js_1.deleteFromCloudinary)(photo.publicId);
-    await prisma_js_1.default.listingPhoto.delete({ where: { id: photoId } });
+    await deleteFromCloudinary(photo.publicId);
+    await prisma.listingPhoto.delete({ where: { id: photoId } });
     return res.json({ message: "Photo deleted successfully" });
 }
 //# sourceMappingURL=upload.controller.js.map

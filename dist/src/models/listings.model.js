@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.listings = void 0;
 const listings = [
     {
         id: 1,
@@ -53,5 +50,5 @@ const listings = [
         userId: 5
     }
 ];
-exports.listings = listings;
+export { listings };
 //# sourceMappingURL=listings.model.js.map
