@@ -1,1 +1,9 @@
-# ✅ Task Complete: PrismaClient Import Fixed\n\n**Summary:**\n- Import updated for Prisma v7 adapter compatibility.\n- Client regenerated successfully.\n- Server runs without TS errors (`npm run dev` active).\n\n**Final status:** Error resolved. Database connects successfully.
+# TODO: Prevent pushing .js, .d.ts, .js.map files to GitHub
+
+## Steps:
+- [x] Step 1: Edit .gitignore to add ignore patterns for *.js, *.d.ts, *.js.map, *.d.ts.map
+- [x] Step 2: Check for already tracked generated files with git commands
+- [x] Step 3: Remove cached generated files if tracked (git rm --cached)
+- [ ] Step 4: Commit .gitignore changes
+- [ ] Step 5: Verify with git status
+
