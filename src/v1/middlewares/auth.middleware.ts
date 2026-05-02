@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export interface AuthRequest extends Request {
-    userId?: number;
+    userId?: string;
     role?: string;
 }
 
@@ -20,8 +20,8 @@ export async function  authentication(req: AuthRequest, res: Response, next: Nex
         return res.status(401).json({error: "No token provided"});
     }
 
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as unknown as { userId:number, role: string};
+try {
+        const decoded = jwt.verify(token, JWT_SECRET) as unknown as { userId:string, role: string};
         req.userId = decoded.userId;
         req.role = decoded.role;
         next();

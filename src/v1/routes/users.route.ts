@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as userController from '../controllers/users.controller.js';
+import * as bookingController from '../controllers/bookings.controller.js';
 
 /**
  * @swagger
@@ -66,6 +67,53 @@ import * as userController from '../controllers/users.controller.js';
  *           type: string
  *           nullable: true
  *           example: Travel enthusiast and foodie
+ *     PaginationResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/BookingResponse'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             page:
+ *               type: integer
+ *               example: 1
+ *             limit:
+ *               type: integer
+ *               example: 10
+ *             totalCount:
+ *               type: integer
+ *               example: 25
+ *             totalPages:
+ *               type: integer
+ *               example: 3
+ *     BookingResponse:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         checkIn:
+ *           type: string
+ *           format: date-time
+ *         checkOut:
+ *           type: string
+ *           format: date-time
+ *         totalPrice:
+ *           type: number
+ *         status:
+ *           type: string
+ *         listingId:
+ *           type: string
+ *         listing:
+ *           type: object
+ *           properties:
+ *             title:
+ *               type: string
+ *             location:
+ *               type: string
  */
 
 const router = Router();
@@ -108,6 +156,18 @@ const router = Router();
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/', userController.getAllUsers);
+
+/**
+ * @swagger
+ * /users/stats:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get users statistics
+ *     responses:
+ *       200:
+ *         description: Users statistics
+ */
+router.get('/stats', userController.getUsersStats);
 
 /**
  * @swagger
@@ -230,5 +290,46 @@ router.put('/:id', userController.updateUser);
  */
 router.delete('/:id', userController.deleteUser);
 
-export default router;
+/**
+ * @swagger
+ * /users/{id}/bookings:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get all bookings for a specific user
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: User ID
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: List of bookings for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaginationResponse'
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.get('/:id/bookings', bookingController.getUserBookings);
 
+export default router;

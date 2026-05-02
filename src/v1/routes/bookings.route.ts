@@ -10,8 +10,9 @@ import { authentication, requireGuest } from '../middlewares/auth.middleware.js'
  *       type: object
  *       properties:
  *         id:
- *           type: integer
- *           example: 1
+ *           type: string
+ *           format: uuid
+ *           example: "550e8400-e29b-41d4-a716-446655440000"
  *         checkIn:
  *           type: string
  *           format: date-time
@@ -20,37 +21,48 @@ import { authentication, requireGuest } from '../middlewares/auth.middleware.js'
  *           type: string
  *           format: date-time
  *           example: '2024-03-05T11:00:00Z'
- *         total:
+ *         totalPrice:
  *           type: number
  *           example: 482.00
  *         status:
  *           type: string
- *           enum: [confirmed, cancelled]
- *           example: confirmed
- *         userId:
- *           type: integer
- *           example: 2
+ *           enum: [PENDING, CONFIRMED, CANCELLED]
+ *           example: PENDING
+ *         guestId:
+ *           type: string
+ *           format: uuid
+ *           example: "550e8400-e29b-41d4-a716-446655440000"
  *         listingId:
- *           type: integer
- *           example: 1
- *         user:
- *           $ref: '#/components/schemas/User'
+ *           type: string
+ *           format: uuid
+ *           example: "550e8400-e29b-41d4-a716-446655440000"
+ *         guest:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               example: "John Doe"
  *         listing:
- *           $ref: '#/components/schemas/Listing'
+ *           type: object
+ *           properties:
+ *             title:
+ *               type: string
+ *               example: "Cozy Apartment"
+ *             location:
+ *               type: string
+ *               example: "New York, NY"
  *         createdAt:
  *           type: string
  *           format: date-time
  *           example: '2024-02-20T09:00:00Z'
  *     CreateBookingInput:
  *       type: object
- *       required: [listingId, userId, checkIn, checkOut]
+ *       required: [listingId, checkIn, checkOut, guests]
  *       properties:
  *         listingId:
- *           type: integer
- *           example: 1
- *         userId:
- *           type: integer
- *           example: 2
+ *           type: string
+ *           format: uuid
+ *           example: "550e8400-e29b-41d4-a716-446655440000"
  *         checkIn:
  *           type: string
  *           format: date-time
@@ -59,6 +71,32 @@ import { authentication, requireGuest } from '../middlewares/auth.middleware.js'
  *           type: string
  *           format: date-time
  *           example: '2024-03-05T11:00:00Z'
+ *         guests:
+ *           type: integer
+ *           minimum: 1
+ *           example: 2
+ *     PaginationResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Booking'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             page:
+ *               type: integer
+ *               example: 1
+ *             limit:
+ *               type: integer
+ *               example: 10
+ *             totalCount:
+ *               type: integer
+ *               example: 25
+ *             totalPages:
+ *               type: integer
+ *               example: 3
  */
 
 const router = Router();
@@ -68,24 +106,31 @@ const router = Router();
  * /bookings:
  *   get:
  *     tags: [Bookings]
- *     summary: Get all bookings
+ *     summary: Get all bookings (paginated)
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
  *         description: List of bookings
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Booking'
+ *               $ref: '#/components/schemas/PaginationResponse'
  *       401:
  *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/', bookingController.getAllBookings);
 
@@ -102,7 +147,8 @@ router.get('/', bookingController.getAllBookings);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: Booking ID
  *     responses:
  *       200:
@@ -113,16 +159,8 @@ router.get('/', bookingController.getAllBookings);
  *               $ref: '#/components/schemas/Booking'
  *       401:
  *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Booking not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/:id', bookingController.getBookingById);
 
@@ -148,23 +186,15 @@ router.get('/:id', bookingController.getBookingById);
  *             schema:
  *               $ref: '#/components/schemas/Booking'
  *       400:
- *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *         description: Bad request - missing required fields
  *       401:
  *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Forbidden — requires guest role
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Listing not found
+ *       409:
+ *         description: Booking conflict
  */
 router.post('/', authentication, requireGuest, bookingController.createBooking);
 
@@ -173,7 +203,7 @@ router.post('/', authentication, requireGuest, bookingController.createBooking);
  * /bookings/{id}:
  *   delete:
  *     tags: [Bookings]
- *     summary: Delete a booking
+ *     summary: Delete (cancel) a booking
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -181,25 +211,21 @@ router.post('/', authentication, requireGuest, bookingController.createBooking);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: Booking ID
  *     responses:
  *       200:
- *         description: Booking deleted successfully
+ *         description: Booking cancelled successfully
  *       401:
  *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: Forbidden - can only cancel your own bookings
  *       404:
  *         description: Booking not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.delete('/:id', authentication, bookingController.deleteBooking);
 
+// Export for use in users route
 export default router;
-
+export { router as bookingsRouter };

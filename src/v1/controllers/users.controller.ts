@@ -3,6 +3,10 @@ import { Request, Response } from 'express';
 import bcrypt from "bcrypt";
 
 import prisma from "../config/prisma.js";
+import { getCache, setCache, deleteCacheByPrefix } from "../config/cache.js";
+
+const USERS_STATS_CACHE_KEY = "users:stats";
+const CACHE_TTL_SECONDS = 300; // 5 minutes
 
 export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -15,17 +19,51 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
         },
       },
     });
-    res.json(users);
+res.json(users);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch users' });
   }
 };
 
+export const getUsersStats = async (req: Request, res: Response): Promise<void> => {
+  // Check cache first
+  const cached = await getCache<{
+    totalUsers: number;
+    byRole: { role: string; _count: { role: number } }[];
+  }>(USERS_STATS_CACHE_KEY);
+
+  if (cached) {
+    res.json(cached);
+    return;
+  }
+
+  // Execute all queries in parallel
+  const [totalUsersResult, byRoleResult] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.groupBy({
+      by: ["role"],
+      _count: { role: true },
+    }),
+  ]);
+
+  const result = {
+    totalUsers: totalUsersResult,
+    byRole: byRoleResult.map((item) => ({
+      role: item.role.toLowerCase(),
+      _count: { role: item._count.role },
+    })),
+  };
+
+  // Cache for 5 minutes
+  await setCache(USERS_STATS_CACHE_KEY, result, CACHE_TTL_SECONDS);
+
+  res.json(result);
+};
+
 export const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const paramId: string = req.params.id as string;
-    const id = parseInt(paramId || '', 10);
-    if (isNaN(id)) {
+    const id: string = req.params.id as string;
+    if (!id) {
       res.status(400).json({ error: 'Invalid ID' });
       return;
     }
@@ -91,9 +129,12 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     if (body.avatar !== undefined) userData.avatar = body.avatar;
     if (body.bio !== undefined) userData.bio = body.bio;
 
-    const user = await prisma.user.create({
+const user = await prisma.user.create({
       data: userData,
     });
+
+    // Clear users stats cache
+    await deleteCacheByPrefix(USERS_STATS_CACHE_KEY);
 
     const { password: _, ...userWithoutPassword } = user;
     res.status(201).json(userWithoutPassword);
@@ -108,9 +149,8 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
 
 export const updateUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const paramId: string = req.params.id as string;
-    const id = parseInt(paramId || '', 10);
-    if (isNaN(id)) {
+    const id: string = req.params.id as string;
+    if (!id) {
       res.status(400).json({ error: 'Invalid ID' });
       return;
     }
@@ -145,10 +185,13 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const user = await prisma.user.update({
+const user = await prisma.user.update({
       where: { id },
       data: updateData,
     });
+
+    // Clear users stats cache
+    await deleteCacheByPrefix(USERS_STATS_CACHE_KEY);
 
     const { password: _, ...userWithoutPassword } = user;
     res.json(userWithoutPassword);
@@ -163,9 +206,8 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
 
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const paramId: string = req.params.id as string;
-    const id = parseInt(paramId || '', 10);
-    if (isNaN(id)) {
+    const id: string = req.params.id as string;
+    if (!id) {
       res.status(400).json({ error: 'Invalid ID' });
       return;
     }
@@ -176,7 +218,11 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    await prisma.user.delete({ where: { id } });
+await prisma.user.delete({ where: { id } });
+
+    // Clear users stats cache
+    await deleteCacheByPrefix(USERS_STATS_CACHE_KEY);
+
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete user' });

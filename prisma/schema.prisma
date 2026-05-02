@@ -1,15 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  //url = env("DATABASE_URL")
 }
 
 enum Role {
@@ -32,27 +26,40 @@ enum BookingStatus {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  username  String    @unique
-  password  String
-  phone     String
-  role      Role      @default(GUEST)
-  avatar    String?
-  avatarPublicId String?
-  bio       String?
+  id               String    @id @default(uuid())
+  name             String
+  email            String    @unique
+  username         String    @unique
+  phone            String
+  password         String?
+  role             Role      @default(GUEST)
+  avatar           String?
+  avatarPublicId   String?
+  bio              String?
   resetToken       String?
   resetTokenExpiry DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt     DateTime     @default(now())
-  listings  Listing[]
-  bookings  Booking[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  listings         Listing[]
+  bookings         Booking[]
+  reviews          Review[]
+  profile          Profile?
 
+  @@index([name])
+  @@index([role])
+}
+
+model Profile {
+  id      String  @id @default(uuid())
+  bio     String?
+  website String?
+  country String?
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String  @unique
 }
 
 model Listing {
-  id            Int          @id @default(autoincrement())
+  id            String         @id @default(uuid())
   title         String
   description   String
   location      String
@@ -61,31 +68,55 @@ model Listing {
   type          ListingType
   amenities     String[]
   rating        Float?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  host          User         @relation(fields: [hostId], references: [id], onDelete: Cascade)
-  hostId        Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  host          User           @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  hostId        String
   bookings      Booking[]
   photos        ListingPhoto[]
+  reviews       Review[]
+
+  @@index([location])
+  @@index([type])
+  @@index([pricePerNight])
+  @@index([hostId])
 }
 
 model ListingPhoto {
-  id        Int      @id @default(autoincrement())
+  id        String  @id @default(uuid())
   url       String
   publicId  String
-  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  listingId Int
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
 }
 
 model Booking {
-  id         Int           @id @default(autoincrement())
+  id         String        @id @default(uuid())
   checkIn    DateTime
   checkOut   DateTime
   totalPrice Float
   status     BookingStatus @default(PENDING)
   createdAt  DateTime      @default(now())
   guest      User          @relation(fields: [guestId], references: [id], onDelete: Cascade)
-  guestId    Int
+  guestId    String
   listing    Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  listingId  Int
+  listingId  String
+
+  @@index([guestId])
+  @@index([listingId])
+  @@index([status])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int
+  comment   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([listingId])
 }

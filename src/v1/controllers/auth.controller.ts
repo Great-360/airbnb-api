@@ -5,7 +5,7 @@ import prisma from "../config/prisma.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../config/email.js";
-import { passwordResetEmail, welcomeEmail } from "../templates/emails.js";
+import { passwordResetEmail, welcomeEmail } from "../../templates/emails.js";
 
 
 export async function register(req: Request, res: Response) {
@@ -68,7 +68,7 @@ export async function login(req: Request, res: Response) {
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(password, user.password!);
   if (!isMatch) {
     return res.status(401).json({ error: "Invalid credentials" });
   }
@@ -114,7 +114,7 @@ export async function changePassword(req: AuthRequest, res: Response) {
         return res.status(404).json({error: "User not found"})
     }
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    const isMatch = await bcrypt.compare(currentPassword, user.password!);
 
     if (!isMatch) {
         return res.status(401).json({error: "Current password is incorrect"});

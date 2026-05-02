@@ -4,7 +4,7 @@ import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { uploadToCloudinary, deleteFromCloudinary } from "../config/cloudinary.js";
 import prisma from "../config/prisma.js";
 
-function getParamAsNumber(paramName: string, params: ParamsDictionary): number {
+function getParamAsString(paramName: string, params: ParamsDictionary): string {
     const paramValue = params[paramName];
 
     let paramStr: string;
@@ -16,15 +16,11 @@ function getParamAsNumber(paramName: string, params: ParamsDictionary): number {
         throw new Error(`Invalid parameter: ${paramName}`);
     }
 
-    const num = parseInt(paramStr, 10);
-    if (isNaN(num)) {
-        throw new Error(`Invalid numeric parameter: ${paramName}`);
-    }
-    return num;
+    return paramStr;
 }
 
 export async function uploadAvatar(req: AuthRequest, res: Response) {
-    const id = getParamAsNumber("id", req.params);
+    const id = getParamAsString("id", req.params);
 
     if (req.userId !== id) {
         return res.status(403).json({ error: "Forbidden: you can only update your own avatar" });
@@ -58,7 +54,7 @@ export async function uploadAvatar(req: AuthRequest, res: Response) {
 }
 
 export async function deleteAvatar(req: AuthRequest, res: Response) {
-    const id = getParamAsNumber("id", req.params);
+    const id = getParamAsString("id", req.params);
 
     if (req.userId !== id) {
         return res.status(403).json({ error: "Forbidden: you can only delete your own avatar" });
@@ -86,7 +82,7 @@ export async function deleteAvatar(req: AuthRequest, res: Response) {
 }
 
 export async function uploadListingPhotos(req: AuthRequest, res: Response) {
-    const id = getParamAsNumber("id", req.params);
+    const id = getParamAsString("id", req.params);
 
     const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing) {
@@ -130,8 +126,8 @@ export async function uploadListingPhotos(req: AuthRequest, res: Response) {
 }
 
 export async function deleteListingPhoto(req: AuthRequest, res: Response) {
-    const id = getParamAsNumber("id", req.params);
-    const photoId = getParamAsNumber("photoId", req.params);
+    const id = getParamAsString("id", req.params);
+    const photoId = getParamAsString("photoId", req.params);
 
     const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing) {

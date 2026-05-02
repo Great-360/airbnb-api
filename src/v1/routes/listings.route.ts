@@ -152,6 +152,89 @@ router.get('/', listingController.getAllListings);
 
 /**
  * @swagger
+ * /listings/stats:
+ *   get:
+ *     tags: [Listings]
+ *     summary: Get listings statistics
+ *     responses:
+ *       200:
+ *         description: Listings statistics
+ */
+router.get('/stats', listingController.getListingsStats);
+
+/**
+ * @swagger
+ * /listings/search:
+ *   get:
+ *     tags: [Listings]
+ *     summary: Search and filter listings
+ *     parameters:
+ *       - in: query
+ *         name: location
+ *         schema:
+ *           type: string
+ *         description: Filter by location (case-insensitive contains)
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [apartment, house, villa, cabin]
+ *         description: Filter by listing type
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Minimum price per night
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Maximum price per night
+ *       - in: query
+ *         name: guests
+ *         schema:
+ *           type: integer
+ *         description: Minimum number of guests
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of results per page
+ *     responses:
+ *       200:
+ *         description: Search results with pagination
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Listing'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ */
+router.get('/search', listingController.searchListings);
+
+/**
+ * @swagger
  * /listings/{id}:
  *   get:
  *     tags: [Listings]
