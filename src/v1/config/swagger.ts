@@ -3,8 +3,13 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
 const port = Number(process.env.PORT) || 3000;
-const apiUrl = process.env.API_URL || `http://localhost:${port}/api/v1`;
+const ensureVersionedApiUrl = (baseUrl: string): string =>
+  /\/api\/v1\/?$/.test(baseUrl) ? baseUrl.replace(/\/$/, '') : `${baseUrl.replace(/\/$/, '')}/api/v1`;
+
+const apiUrl = ensureVersionedApiUrl(process.env.API_URL || `http://localhost:${port}`);
 const docsBaseUrl = apiUrl.replace(/\/api\/v1\/?$/, '');
+const versionedDocsPath = '/api/v1/api-docs';
+const versionedDocsJsonPath = '/api/v1/api-docs.json';
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -49,11 +54,18 @@ function getSpecs(): object {
 }
 
 export function setupSwagger(app: Express): void {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(undefined, { swaggerOptions: { url: '/api-docs.json' } }));
-  app.get('/api-docs.json', (_req, res) => {
+  app.use(versionedDocsPath, swaggerUi.serve, swaggerUi.setup(undefined, { swaggerOptions: { url: versionedDocsJsonPath } }));
+  app.get(versionedDocsJsonPath, (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(getSpecs());
   });
-  console.log(`Swagger docs available at ${docsBaseUrl}/api-docs`);
+  // Backward compatibility for existing bookmarks/integrations.
+  app.get('/api-docs', (_req, res) => {
+    res.redirect(302, versionedDocsPath);
+  });
+  app.get('/api-docs.json', (_req, res) => {
+    res.redirect(302, versionedDocsJsonPath);
+  });
+  console.log(`Swagger docs available at ${docsBaseUrl}${versionedDocsPath}`);
 }
 
