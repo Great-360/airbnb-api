@@ -10,7 +10,7 @@ const router = Router();
 
 /**
  * @swagger
- * /users/{id}/avatar:
+ * /upload/{id}/avatar:
  *   post:
  *     tags: [Upload]
  *     summary: Upload a user avatar
@@ -21,7 +21,8 @@ const router = Router();
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: User ID
  *     requestBody:
  *       required: true
@@ -53,7 +54,7 @@ router.post("/:id/avatar", authentication, upload.single("image"), uploadAvatar)
 
 /**
  * @swagger
- * /users/{id}/avatar:
+ * /upload/{id}/avatar:
  *   delete:
  *     tags: [Upload]
  *     summary: Delete a user avatar
@@ -64,7 +65,8 @@ router.post("/:id/avatar", authentication, upload.single("image"), uploadAvatar)
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: User ID
  *     responses:
  *       200:
@@ -85,4 +87,3 @@ router.post("/:id/avatar", authentication, upload.single("image"), uploadAvatar)
 router.delete("/:id/avatar", authentication, deleteAvatar);
 
 export default router;
-

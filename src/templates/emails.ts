@@ -1,9 +1,10 @@
 export function welcomeEmail(name: string, role: string): string {
   const ctaText = role === "HOST" ? "Create Your First Listing" : "Explore Listings";
+  const apiUrl = process.env.API_URL || `http://localhost:${process.env.PORT}/api/v1`;
   const ctaHref =
     role === "HOST"
-      ? "http://localhost:3000/listings/new"
-      : "http://localhost:3000/listings";
+      ? `${apiUrl}/listings/new`
+      : `${apiUrl}/listings`;
   const message =
     role === "HOST"
       ? "Start earning by hosting guests from around the world."
@@ -28,7 +29,9 @@ export function bookingConfirmationEmail(
   checkOut: string,
   totalPrice: number
 ): string {
+  const apiUrl = process.env.API_URL || `http://localhost:${process.env.PORT}/api/v1`;
   return `
+  
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <h1 style="color: #FF5A5F;">Booking Confirmed</h1>
     <p>Hi ${guestName}, your booking is confirmed.</p>
@@ -39,7 +42,7 @@ export function bookingConfirmationEmail(
     <p style="margin: 4px 0;"><strong>Check-out:</strong> ${checkOut}</p>
     <p style="margin: 4px 0;"><strong>Total Price:</strong> $${totalPrice.toFixed(2)}</p>
     <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;" />
-    <p style="font-size: 13px; color: #555;">Please review our <a href="http://localhost:3000/cancellation-policy" style="color: #FF5A5F; text-decoration: none;">cancellation policy</a> for more details.</p>
+    <p style="font-size: 13px; color: #555;">Please review our <a href="${apiUrl}/cancellation-policy" style="color: #FF5A5F; text-decoration: none;">cancellation policy</a> for more details.</p>
   </div>`;
 }
 
@@ -49,6 +52,7 @@ export function bookingCancellationEmail(
   checkIn: string,
   checkOut: string
 ): string {
+  const apiUrl = process.env.API_URL || `http://localhost:${process.env.PORT}/api/v1`;
   return `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <h1 style="color: #FF5A5F;">Booking Cancelled</h1>
@@ -57,7 +61,7 @@ export function bookingCancellationEmail(
     <p><strong>Check-in:</strong> ${checkIn}<br/><strong>Check-out:</strong> ${checkOut}</p>
     <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;" />
     <p>We are sorry to see this booking go. Explore other listings and plan your next trip!</p>
-    <a href="http://localhost:3000/listings" style="display: inline-block; background-color: #FF5A5F; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 10px;">
+    <a href="${apiUrl}/listings" style="display: inline-block; background-color: #FF5A5F; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 10px;">
       Explore Listings
     </a>
   </div>`;

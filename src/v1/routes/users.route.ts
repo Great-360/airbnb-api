@@ -10,8 +10,9 @@ import * as bookingController from '../controllers/bookings.controller.js';
  *       type: object
  *       properties:
  *         id:
- *           type: integer
- *           example: 1
+ *           type: string
+ *           format: uuid
+ *           example: "550e8400-e29b-41d4-a716-446655440000"
  *         name:
  *           type: string
  *           example: Jane Doe
@@ -182,7 +183,8 @@ router.get('/stats', userController.getUsersStats);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: User ID
  *     responses:
  *       200:
@@ -221,7 +223,8 @@ router.post('/', userController.createUser);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: User ID
  *     requestBody:
  *       required: true
@@ -270,7 +273,8 @@ router.put('/:id', userController.updateUser);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: User ID
  *     responses:
  *       200:

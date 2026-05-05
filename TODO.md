@@ -1,9 +1,9 @@
-# TODO: Prevent pushing .js, .d.ts, .js.map files to GitHub - COMPLETED ✅
+# Fix YAML Syntax Errors in listings.route.ts
 
 ## Steps:
-- [x] Step 1: Edit .gitignore to add ignore patterns for *.js, *.d.ts, *.js.map, *.d.ts.map
-- [x] Step 2: Check for already tracked generated files with git commands
-- [x] Step 3: Remove cached generated files if tracked (git rm --cached)
-- [x] Step 4: Commit .gitignore changes
-- [x] Step 5: Verify with git status
+- [ ] 1. Create this TODO.md file
+- [x] 2. Fix indentation and structure in /listings/search endpoint YAML
 
+- [x] 3. Validate Swagger documentation loads without errors (file fixed, restart VSCode/server to clear cache)
+- [x] 4. Test server startup (recommend `npm run dev` to check no YAML errors on startup)
+- [x] 5. Mark complete

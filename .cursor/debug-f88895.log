@@ -1,0 +1,10 @@
+{"sessionId":"f88895","runId":"run1","hypothesisId":"H3","location":"src/v1/config/swagger.ts:47","message":"Entering setupSwagger","data":{"docsBaseUrl":"http://localhost:3000"},"timestamp":1777969801557}
+{"sessionId":"f88895","runId":"run1","hypothesisId":"H3","location":"src/v1/config/swagger.ts:51","message":"Swagger middleware registered","data":{"route":"/api-docs"},"timestamp":1777969801592}
+{"sessionId":"f88895","runId":"run1","hypothesisId":"H1","location":"src/index.ts:39","message":"setupSwagger completed","data":{"nodeEnv":"production","port":3000},"timestamp":1777969801593}
+{"sessionId":"f88895","runId":"run1","hypothesisId":"H5","location":"src/index.ts:45","message":"Server listen callback","data":{"port":3000},"timestamp":1777969801607}
+{"sessionId":"f88895","runId":"run1","hypothesisId":"H3","location":"src/v1/config/swagger.ts:47","message":"Entering setupSwagger","data":{"docsBaseUrl":"http://localhost:3000"},"timestamp":1777969827332}
+{"sessionId":"f88895","runId":"run1","hypothesisId":"H3","location":"src/v1/config/swagger.ts:51","message":"Swagger middleware registered","data":{"route":"/api-docs"},"timestamp":1777969827367}
+{"sessionId":"f88895","runId":"run1","hypothesisId":"H1","location":"src/index.ts:39","message":"setupSwagger completed","data":{"nodeEnv":"production","port":3000},"timestamp":1777969827368}
+{"sessionId":"f88895","runId":"run1","hypothesisId":"H5","location":"src/index.ts:45","message":"Server listen callback","data":{"port":3000},"timestamp":1777969827380}
+{"sessionId":"f88895","runId":"run1","hypothesisId":"H3","location":"src/v1/config/swagger.ts:47","message":"Entering setupSwagger","data":{"docsBaseUrl":"http://localhost:3000"},"timestamp":1777969915548}
+{"sessionId":"f88895","runId":"run1","hypothesisId":"H3","location":"src/v1/config/swagger.ts:51","message":"Swagger middleware registered","data":{"route":"/api-docs"},"timestamp":1777969915613}

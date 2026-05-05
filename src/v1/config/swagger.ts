@@ -2,6 +2,10 @@ import { Express } from 'express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
+const port = Number(process.env.PORT) || 3000;
+const apiUrl = process.env.API_URL || `http://localhost:${port}/api/v1`;
+const docsBaseUrl = apiUrl.replace(/\/api\/v1\/?$/, '');
+
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
@@ -13,8 +17,8 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Local development server',
+        url: apiUrl,
+        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Local development server',
       },
     ],
     components: {
@@ -32,17 +36,24 @@ const options: swaggerJsdoc.Options = {
       },
     ],
   },
-  apis: ['./src/routes/*.ts'],
+  apis: ['./src/v1/routes/*.ts'],
 };
 
-const specs = swaggerJsdoc(options);
+let cachedSpecs: object | null = null;
+
+function getSpecs(): object {
+  if (!cachedSpecs) {
+    cachedSpecs = swaggerJsdoc(options);
+  }
+  return cachedSpecs;
+}
 
 export function setupSwagger(app: Express): void {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(undefined, { swaggerOptions: { url: '/api-docs.json' } }));
   app.get('/api-docs.json', (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    res.send(specs);
+    res.send(getSpecs());
   });
-  console.log(`Swagger docs available at http://localhost:3000/api-docs`);
+  console.log(`Swagger docs available at ${docsBaseUrl}/api-docs`);
 }
 

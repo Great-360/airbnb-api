@@ -479,4 +479,3 @@ router.post('/:id/photos', authentication, upload.array('photos', 5), uploadList
 router.delete('/:id/photos/:photoId', authentication, deleteListingPhoto);
 
 export default router;
-
