@@ -39,8 +39,13 @@ export async function getMyWishlist(req: AuthRequest, res: Response): Promise<vo
 
 
 export async function addToWishlist(req: AuthRequest, res: Response): Promise<void> {
-  const userId    = req.userId!;
-  const listingId = req.params.listingId;
+  const userId = req.userId!;
+  const listingId = req.params.listingId as string;
+
+  if (!listingId) {
+    res.status(400).json({ error: "Invalid listing id" });
+    return;
+  }
 
   // Make sure the listing exists before saving it
   const listing = await prisma.listing.findUnique({ where: { id: listingId } });
@@ -49,19 +54,26 @@ export async function addToWishlist(req: AuthRequest, res: Response): Promise<vo
     return;
   }
 
-  
   const wishlist = await prisma.wishlist.upsert({
-    where:  { userId_listingId: { userId, listingId } },
-    update: {},                    // already exists → no-op
-    create: { userId, listingId },
+    where: { userId_listingId: { userId, listingId } },
+    update: {}, // already exists → no-op
+    create: {
+      user: { connect: { id: userId } },
+      listing: { connect: { id: listingId } },
+    },
   });
 
   res.status(201).json({ saved: true, wishlistId: wishlist.id });
 }
 
 export async function removeFromWishlist(req: AuthRequest, res: Response): Promise<void> {
-  const userId    = req.userId!;
-  const listingId = req.params.listingId;
+  const userId = req.userId!;
+  const listingId = req.params.listingId as string;
+
+  if (!listingId) {
+    res.status(400).json({ error: "Invalid listing id" });
+    return;
+  }
 
   const existing = await prisma.wishlist.findUnique({
     where: { userId_listingId: { userId, listingId } },
