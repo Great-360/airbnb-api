@@ -43,11 +43,13 @@ model User {
   listings         Listing[]
   bookings         Booking[]
   reviews          Review[]
+  wishlist         Wishlist[]
   profile          Profile?
 
   @@index([name])
   @@index([role])
 }
+
 
 model Profile {
   id      String  @id @default(uuid())
@@ -75,12 +77,28 @@ model Listing {
   bookings      Booking[]
   photos        ListingPhoto[]
   reviews       Review[]
+  wishlist      Wishlist[]
 
   @@index([location])
   @@index([type])
   @@index([pricePerNight])
   @@index([hostId])
 }
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, listingId])
+  @@index([userId])
+  @@index([listingId])
+}
+
 
 model ListingPhoto {
   id        String  @id @default(uuid())
@@ -120,3 +138,4 @@ model Review {
   @@index([userId])
   @@index([listingId])
 }
+

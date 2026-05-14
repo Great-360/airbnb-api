@@ -7,6 +7,7 @@ import bookingsRouter from "../v1/routes/bookings.route.js";
 import reviewsRouter from "../v1/routes/review.route.js";
 import aiRouter from "../v1/routes/ai.route.js";
 import uploadRouter from "../v1/routes/upload.route.js";
+import wishlistRouter from "../v1/routes/wishlist.route.js";
 
 import { generalLimiter, strictLimiter } from "../middlewares/rateLimiter.js";
 
@@ -25,5 +26,6 @@ v1Router.use("/bookings", bookingsRouter);
 v1Router.use("/reviews", reviewsRouter);
 v1Router.use("/ai", aiRouter);
 v1Router.use("/upload", uploadRouter);
+v1Router.use("/wishlists", wishlistRouter);
 
 export default v1Router;
