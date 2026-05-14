@@ -70,6 +70,7 @@ export const searchListings = async (req: Request, res: Response): Promise<void>
             email: true,
           },
         },
+        photos: true,
       },
     }),
     prisma.listing.count({ where }),
@@ -145,6 +146,7 @@ export const getAllListings = async (req: Request, res: Response): Promise<void>
           avatar: true,
         },
       },
+      photos: true,
     },
   });
   res.json(listings);
@@ -158,7 +160,7 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
   }
   const listing = await prisma.listing.findUnique({
     where: { id },
-    include: { host: true, bookings: true },
+    include: { host: true, bookings: true, photos: true },
   });
   if (!listing) {
     res.status(404).json({ error: "Listing not found" });
