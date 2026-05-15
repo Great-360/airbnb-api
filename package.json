@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
     "db:seed": "prisma db seed",
+    "db:seed-coordinates": "tsx prisma/scripts/seed-listing-coordinates.ts",
     "db:studio": "prisma studio",
     "db:generate": "prisma generate && npm run db:link-client",
     "db:link-client": "node -e \"const fs=require('fs');const p=require('path');const t=p.join(process.cwd(),'node_modules','@prisma','client','.prisma');if(!fs.existsSync(t)){fs.mkdirSync(p.dirname(t),{recursive:true});fs.symlinkSync(p.join('..','..','.prisma'),t,'dir');console.log('linked',t);}else{console.log('link-exists',t);}\"",

@@ -2,9 +2,26 @@ import type { Request, Response, NextFunction } from "express";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
 import prisma from "../config/prisma.js";
 import { getCache, setCache, deleteCache, deleteCacheByPrefix } from "../config/cache.js";
+import { formatReview } from "../utils/listing.utils.js";
 
 // API summary cache prefix - kept for future use when AI summary feature is implemented
 const REVIEW_SUMMARY_CACHE_PREFIX = "ai:review-summary:";
+
+async function syncListingReviewStats(listingId: string): Promise<void> {
+  const agg = await prisma.review.aggregate({
+    where: { listingId },
+    _count: { _all: true },
+    _avg: { rating: true },
+  });
+
+  await prisma.listing.update({
+    where: { id: listingId },
+    data: {
+      reviewCount: agg._count._all,
+      rating: agg._count._all > 0 ? agg._avg.rating : null,
+    },
+  });
+}
 
 export async function getListingReviews(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -26,20 +43,31 @@ export async function getListingReviews(req: Request, res: Response, next: NextF
       return;
     }
 
-    const [reviews, total] = await Promise.all([
+    const listingId = String(id);
+
+    const [reviews, total, ratingAgg] = await Promise.all([
       prisma.review.findMany({
-        where: { listingId: String(id) },
+        where: { listingId },
         include: { user: { select: { name: true, avatar: true } } },
         orderBy: { createdAt: "desc" },
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
       }),
-      prisma.review.count({ where: { listingId: String(id) } }),
+      prisma.review.count({ where: { listingId } }),
+      prisma.review.aggregate({
+        where: { listingId },
+        _avg: { rating: true },
+      }),
     ]);
 
+    const averageRating =
+      total > 0 && ratingAgg._avg.rating != null
+        ? Math.round(ratingAgg._avg.rating * 100) / 100
+        : null;
+
     const result = {
-      data: reviews,
-      meta: { total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) },
+      data: reviews.map(formatReview),
+      meta: { total, averageRating },
     };
 
     await setCache(cacheKey, result, 30); // 30-second cache
@@ -73,10 +101,14 @@ export async function createReview(req: AuthRequest, res: Response, next: NextFu
       return;
     }
 
+    const listingId = String(id);
+
     const review = await prisma.review.create({
-      data: { rating: ratingNum, comment, userId, listingId: String(id) },
+      data: { rating: ratingNum, comment, userId, listingId },
       include: { user: { select: { name: true, avatar: true } } },
     });
+
+    await syncListingReviewStats(listingId);
 
     // Invalidate review cache and AI summary cache for this listing
     await Promise.all([
@@ -84,7 +116,7 @@ export async function createReview(req: AuthRequest, res: Response, next: NextFu
       deleteCache(`${REVIEW_SUMMARY_CACHE_PREFIX}${id}`),
     ]);
 
-    res.status(201).json(review);
+    res.status(201).json(formatReview(review));
   } catch (error) {
     next(error);
   }
@@ -106,6 +138,7 @@ export async function deleteReview(req: AuthRequest, res: Response, next: NextFu
     }
 
     await prisma.review.delete({ where: { id: String(id) } });
+    await syncListingReviewStats(review.listingId);
 
     // Invalidate review cache for the listing
     await deleteCacheByPrefix(`reviews:listing:${review.listingId}:`);

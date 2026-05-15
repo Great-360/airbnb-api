@@ -3,6 +3,7 @@ import * as listingController from '../controllers/listings.controller.js';
 import { authentication, requireHost } from '../middlewares/auth.middleware.js';
 import upload from '../config/multer.js';
 import { uploadListingPhotos, deleteListingPhoto } from '../controllers/upload.controller.js';
+import { getListingReviews, createReview } from '../controllers/review.controller.js';
 
 /**
  * @swagger
@@ -232,6 +233,9 @@ router.get('/stats', listingController.getListingsStats);
  *                       type: integer
  */
 router.get('/search', listingController.searchListings);
+
+router.get('/:id/reviews', getListingReviews);
+router.post('/:id/reviews', authentication, createReview);
 
 /**
  * @swagger

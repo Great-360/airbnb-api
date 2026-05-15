@@ -2,6 +2,7 @@ import "dotenv/config.js";
 import { PrismaClient } from "@prisma/client/extension";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
+import { coordinatesForLocation } from "./location-coordinates.js";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -24,6 +25,7 @@ async function main() {
             username: "alicej",
             password: hashedPassword,
             role: "HOST",
+            isSuperhost: true,
             phone: "+1-555-123-4567",
             bio: "I'm a passionate traveler and photographer.",
         }
@@ -68,6 +70,7 @@ async function main() {
         title: "Beachfront Villa",
         description: "A luxurious villa on the beach with stunning views.",
         location: "Maldives",
+        ...coordinatesForLocation("Maldives")!,
         pricePerNight: 500,
         type: "VILLA",
         guests: 4,
@@ -80,6 +83,7 @@ async function main() {
             title: "Mountain Cabin",
             description: "A cozy cabin nestled in the mountains.",
             location: "Nepal",
+            ...coordinatesForLocation("Nepal")!,
             pricePerNight: 300,
             type: "CABIN",
             guests: 2,
@@ -92,6 +96,7 @@ async function main() {
             title: "City Loft",
             description: "A modern loft in the heart of the city.",
             location: "New York",
+            ...coordinatesForLocation("New York")!,
             pricePerNight: 800,
             type: "VILLA",
             guests: 6,

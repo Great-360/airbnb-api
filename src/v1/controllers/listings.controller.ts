@@ -3,6 +3,7 @@ import { AuthRequest } from "../middlewares/auth.middleware.js";
 import prisma from "../config/prisma.js";
 import { ListingType } from "@prisma/client";
 import { getCache, setCache, deleteCacheByPrefix } from "../config/cache.js";
+import { HOST_PUBLIC_SELECT, sanitizeHost } from "../utils/listing.utils.js";
 
 const LISTINGS_STATS_CACHE_KEY = "listings:stats";
 const CACHE_TTL_SECONDS = 300; // 5 minutes
@@ -160,13 +161,21 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
   }
   const listing = await prisma.listing.findUnique({
     where: { id },
-    include: { host: true, bookings: true, photos: true },
+    include: {
+      host: { select: HOST_PUBLIC_SELECT },
+      photos: true,
+    },
   });
   if (!listing) {
     res.status(404).json({ error: "Listing not found" });
     return;
   }
-  res.json(listing);
+
+  const { host, ...listingFields } = listing;
+  res.json({
+    ...listingFields,
+    host: sanitizeHost(host),
+  });
 };
 
 

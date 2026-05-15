@@ -36,6 +36,7 @@ model User {
   avatar           String?
   avatarPublicId   String?
   bio              String?
+  isSuperhost      Boolean   @default(false)
   resetToken       String?
   resetTokenExpiry DateTime?
   createdAt        DateTime  @default(now())
@@ -65,11 +66,14 @@ model Listing {
   title         String
   description   String
   location      String
+  latitude      Float?
+  longitude     Float?
   pricePerNight Float
   guests        Int
   type          ListingType
   amenities     String[]
   rating        Float?
+  reviewCount   Int            @default(0)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   host          User           @relation(fields: [hostId], references: [id], onDelete: Cascade)
