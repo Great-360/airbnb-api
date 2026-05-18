@@ -13,7 +13,7 @@ function formatDate(date: Date): string {
   });
 }
 
-// POST /bookings - Create a booking (reserve immediately confirms)
+// POST /bookings - Create a booking (reserve as pending confirmation)
 export const createBooking = async (req: AuthRequest, res: Response): Promise<void> => {
   const { listingId, checkIn, checkOut, guests } = req.body;
   const guestId = req.userId as string;
@@ -92,8 +92,8 @@ export const createBooking = async (req: AuthRequest, res: Response): Promise<vo
       checkIn: checkInDate,
       checkOut: checkOutDate,
       totalPrice,
-      // Reserve immediately confirms and blocks the dates
-      status: "CONFIRMED",
+      // Reserve as pending confirmation and block the dates
+      status: "PENDING",
     },
   });
 
@@ -103,7 +103,7 @@ export const createBooking = async (req: AuthRequest, res: Response): Promise<vo
     if (guest) {
       await sendEmail(
         guest.email,
-        "Booking Confirmed",
+        "Booking Request Sent",
         bookingConfirmationEmail(
           guest.name,
           listing.title,
